@@ -31,19 +31,19 @@
             this.btOpAcc = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.lbAccName = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btCreate = new System.Windows.Forms.Button();
+            this.btAdd = new System.Windows.Forms.Button();
+            this.btLast = new System.Windows.Forms.Button();
             this.btExit = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btOpAcc
             // 
-            this.btOpAcc.Location = new System.Drawing.Point(35, 39);
+            this.btOpAcc.Location = new System.Drawing.Point(78, 31);
             this.btOpAcc.Name = "btOpAcc";
-            this.btOpAcc.Size = new System.Drawing.Size(75, 23);
+            this.btOpAcc.Size = new System.Drawing.Size(136, 23);
             this.btOpAcc.TabIndex = 0;
-            this.btOpAcc.Text = "Open";
+            this.btOpAcc.Text = "Открыть";
             this.btOpAcc.UseVisualStyleBackColor = true;
             this.btOpAcc.Click += new System.EventHandler(this.btOpAcc_Click);
             // 
@@ -54,46 +54,49 @@
             // lbAccName
             // 
             this.lbAccName.AutoSize = true;
-            this.lbAccName.Location = new System.Drawing.Point(131, 39);
+            this.lbAccName.Location = new System.Drawing.Point(2, 9);
             this.lbAccName.Name = "lbAccName";
-            this.lbAccName.Size = new System.Drawing.Size(232, 13);
+            this.lbAccName.Size = new System.Drawing.Size(260, 13);
             this.lbAccName.TabIndex = 1;
-            this.lbAccName.Text = "Нажмите Open, что бы выбрать базу Access";
+            this.lbAccName.Text = "Нажмите \"Открыть\", что бы выбрать базу Access";
             // 
-            // button1
+            // btCreate
             // 
-            this.button1.Location = new System.Drawing.Point(35, 68);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btCreate.Enabled = false;
+            this.btCreate.Location = new System.Drawing.Point(78, 60);
+            this.btCreate.Name = "btCreate";
+            this.btCreate.Size = new System.Drawing.Size(136, 23);
+            this.btCreate.TabIndex = 2;
+            this.btCreate.Text = "Создаем таблицу";
+            this.btCreate.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // btAdd
             // 
-            this.button2.Location = new System.Drawing.Point(134, 67);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 3;
-            this.button2.Text = "button2";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btAdd.Enabled = false;
+            this.btAdd.Location = new System.Drawing.Point(78, 89);
+            this.btAdd.Name = "btAdd";
+            this.btAdd.Size = new System.Drawing.Size(136, 23);
+            this.btAdd.TabIndex = 3;
+            this.btAdd.Text = "Добавляем запись";
+            this.btAdd.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // btLast
             // 
-            this.button3.Location = new System.Drawing.Point(233, 67);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 4;
-            this.button3.Text = "button3";
-            this.button3.UseVisualStyleBackColor = true;
+            this.btLast.Enabled = false;
+            this.btLast.Location = new System.Drawing.Point(78, 118);
+            this.btLast.Name = "btLast";
+            this.btLast.Size = new System.Drawing.Size(136, 23);
+            this.btLast.TabIndex = 4;
+            this.btLast.Text = "Последняя запись";
+            this.btLast.UseVisualStyleBackColor = true;
             // 
             // btExit
             // 
-            this.btExit.Location = new System.Drawing.Point(363, 67);
+            this.btExit.Location = new System.Drawing.Point(78, 147);
             this.btExit.Name = "btExit";
-            this.btExit.Size = new System.Drawing.Size(75, 23);
+            this.btExit.Size = new System.Drawing.Size(136, 23);
             this.btExit.TabIndex = 5;
-            this.btExit.Text = "Exit";
+            this.btExit.Text = "Выход";
             this.btExit.UseVisualStyleBackColor = true;
             this.btExit.Click += new System.EventHandler(this.btExit_Click);
             // 
@@ -101,15 +104,16 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(922, 265);
+            this.ClientSize = new System.Drawing.Size(301, 179);
             this.Controls.Add(this.btExit);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btLast);
+            this.Controls.Add(this.btAdd);
+            this.Controls.Add(this.btCreate);
             this.Controls.Add(this.lbAccName);
             this.Controls.Add(this.btOpAcc);
             this.Name = "fmAccess";
             this.Text = "Работаем с Access";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.fmAccess_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -120,9 +124,9 @@
         private System.Windows.Forms.Button btOpAcc;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Label lbAccName;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btCreate;
+        private System.Windows.Forms.Button btAdd;
+        private System.Windows.Forms.Button btLast;
         private System.Windows.Forms.Button btExit;
 
     }
