@@ -69,6 +69,7 @@
             this.btCreate.TabIndex = 2;
             this.btCreate.Text = "Создаем таблицу";
             this.btCreate.UseVisualStyleBackColor = true;
+            this.btCreate.Click += new System.EventHandler(this.btCreate_Click);
             // 
             // btAdd
             // 

@@ -15,13 +15,19 @@ namespace WindowsFormsApplication1
     {
         string dbName = "";
         string dbConStr = "Provider=Microsoft.Jet.OLEDB.4.0; Data Source =";
+        string dbCreateStr = "";
+        string hasTable = "SELECT count(name) from MSysObjects where MSysObjects.Type=1 and name  = \"Junior\";";
+        string crTable = "create table Junior (ID COUNTER, FirstName char,LastName char);";
+        string getLast = "select ID,FirstName,LastName from Junior where ID = (select max(ID) from Junior);";
+        string insStr = "insert into Junior(FirstName,LastName)  ";
+
         private OleDbConnection myDbConn =null;
         public fmAccess()
         {
             InitializeComponent();
             lbAccName.Text = "Нажмите Open, что бы выбрать базу Access";
         }
-        private void makeDbConnection() 
+        private void MakeDbConnection() 
         {
             myDbConn = new OleDbConnection(dbConStr);
             try
@@ -54,15 +60,18 @@ namespace WindowsFormsApplication1
                 dbName = openFileDialog1.FileName;
                 lbAccName.Text = dbName;
                 dbConStr += dbName;
-                makeDbConnection();
-
+                MakeDbConnection();
+                if (myDbConn != null) { //активируем кнопки , если удачно открыли файл
+                    this.btCreate.Enabled = true;
+                    this.btAdd.Enabled = true;
+                    this.btLast.Enabled = true;
+                }
             }
             else
             {
                 MessageBox.Show("Необходимо указать , c какой базой Access нужно работать!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            
         }
 
         private void btExit_Click(object sender, EventArgs e)
@@ -76,16 +85,10 @@ namespace WindowsFormsApplication1
                 myDbConn.Close();
         }
 
-
-
-
-
-
-
-
-
-
-
-
+        private void btCreate_Click(object sender, EventArgs e)
+        {
+            //TODO:
+            myDbConn.
+        }
     }
 }
