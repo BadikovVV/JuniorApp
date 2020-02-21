@@ -27,6 +27,25 @@ namespace WindowsFormsApplication1
             InitializeComponent();
             lbAccName.Text = "Нажмите Open, что бы выбрать базу Access";
         }
+        private void ErrorsInfo(OleDbException err)
+        {
+            string errMsgs = "";
+            for (int i = 0; i < err.Errors.Count; i++)
+            {
+                errMsgs += "Index #" + i + "\n" +
+                      "Message: " + err.Errors[i].Message + "\n" +
+                      "NativeError: " + err.Errors[i].NativeError + "\n" +
+                      "Source: " + err.Errors[i].Source + "\n" +
+                      "SQLState: " + err.Errors[i].SQLState + "\n";
+                System.Diagnostics.EventLog log = new System.Diagnostics.EventLog();
+                log.Source = "My Application";
+                log.WriteEntry(errMsgs);
+            }
+            MessageBox.Show("Возникли ошибки при работе с БД Access! Обратитесь к системному администратору!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            myDbConn.Dispose();
+            myDbConn = null;
+        }
+
         private void MakeDbConnection() 
         {
             myDbConn = new OleDbConnection(dbConStr);
@@ -36,21 +55,8 @@ namespace WindowsFormsApplication1
             }
             catch (OleDbException err)
             {
-                string errMsgs = "";
-                for (int i = 0; i < err.Errors.Count; i++)
-                {
-                    errMsgs += "Index #" + i + "\n" +
-                          "Message: " + err.Errors[i].Message + "\n" +
-                          "NativeError: " + err.Errors[i].NativeError + "\n" +
-                          "Source: " + err.Errors[i].Source + "\n" +
-                          "SQLState: " + err.Errors[i].SQLState + "\n";
-                    System.Diagnostics.EventLog log = new System.Diagnostics.EventLog();
-                    log.Source = "My Application";
-                    log.WriteEntry(errMsgs);
-                    MessageBox.Show("Возникли ошибки при работе с БД Access! Обратитесь к системному администратору!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    myDbConn.Dispose();
-                    myDbConn = null;
-                }
+                ErrorsInfo(err);
+
             }
         }
         private void btOpAcc_Click(object sender, EventArgs e)
@@ -87,8 +93,34 @@ namespace WindowsFormsApplication1
 
         private void btCreate_Click(object sender, EventArgs e)
         {
-            //TODO:
-            myDbConn.
+            if (myDbConn.State == ConnectionState.Open) {
+                // analyzing is there table with name Junior in DataBase
+                OleDbCommand oleDbCommand = new OleDbCommand(hasTable, myDbConn);
+                try
+                {
+                    OleDbDataReader oleDbData= oleDbCommand.ExecuteReader();
+                    int rez = oleDbData.GetInt32(0);
+                    oleDbData.Close(); 
+                    if (rez>0) //таблица с таким именем (Junior) уже есть в БазеДанных
+                    {
+                        MessageBox.Show("Tаблица с таким именем (Junior) уже есть в выбранной БазеДанных", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        oleDbData.Close();
+                    }
+                    else // таблицы Junior  нет в БД, создаем её
+                    {
+                        oleDbCommand = null;
+                        // creating a table
+                        oleDbCommand = new OleDbCommand(crTable, myDbConn);
+                        oleDbCommand.ExecuteNonQuery();
+                    }
+                }
+                catch (OleDbException err)
+                {
+                    ErrorsInfo(err);
+                }
+            }
+
+            
         }
     }
 }
