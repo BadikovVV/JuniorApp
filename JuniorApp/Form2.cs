@@ -14,7 +14,7 @@ namespace WindowsFormsApplication1
     public partial class fmAccess : Form
     {
         string dbName = "";
-        string dbConStr = "Provider=Microsoft.Jet.OLEDB.4.0; Data Source =";
+        string dbConStr = "Provider=Microsoft.ACE.OLEDB.12.0; Data Source =";
         string dbCreateStr = "";
         string hasTable = "SELECT count(name) from MSysObjects where MSysObjects.Type=1 and name  = \"Junior\";";
         string crTable = "create table Junior (ID COUNTER, FirstName char,LastName char);";
