@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -45,10 +46,27 @@ namespace WindowsFormsApplication1
             myDbConn.Dispose();
             myDbConn = null;
         }
+        private bool MakeConnString() {
+            bool retVar = false,newOleDB=false,oldOleDB=false ;
+            //TODO: добавить анализ расширения и наличие необходимого oleDB провайдера
+            string flExt = Path.GetExtension(dbName);
+            OleDbEnumerator enumerator = new OleDbEnumerator();
+            DataRow[] foundRows = enumerator.GetElements().Select("SOURCES_DESCRIPTION LIKE 'Microsoft.ACE.OLEDB%'");  // 'Microsoft Jet 4.0 OLE DB Provider'");
+            if (flExt == "mdb") // старая версия
+            {
+                //dataView.RowFilter = "Name LIKE '%jo%'"     // values that contain 'jo'
 
+            }
+            else
+            {
+                DataRow[] foundRows = enumerator.GetElements().Select("",);
+            }
+            return retVar;
+        }
         private void MakeDbConnection() 
         {
             myDbConn = new OleDbConnection(dbConStr);
+            
             try
             {
                 myDbConn.Open();
@@ -65,6 +83,11 @@ namespace WindowsFormsApplication1
             {
                 dbName = openFileDialog1.FileName;
                 lbAccName.Text = dbName;
+                if (MakeConnString()== false) // нужного провайдера нет и не можем создать строку подключения
+                {
+                    MessageBox.Show("Нет необходимого OLEDB провайдера для работы с Access!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 dbConStr += dbName;
                 MakeDbConnection();
                 if (myDbConn != null) { //активируем кнопки , если удачно открыли файл
