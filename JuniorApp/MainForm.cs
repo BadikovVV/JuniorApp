@@ -37,7 +37,8 @@ namespace WindowsFormsApplication1
 
         private void btMSSql_Click(object sender, EventArgs e)
         {
-
+            fmMSSQL fm = new fmMSSQL();
+            fm.ShowDialog();
         }
     }
 }

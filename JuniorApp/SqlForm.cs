@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -12,37 +13,39 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApplication1
 {
-    public partial class fmAccess : Form
+    public partial class fmMSSQL: Form
     {
-        string dbName = "";
-        string dbConStr = "Provider=Microsoft.ACE.OLEDB.12.0; Data Source =";
-       // string dbCreateStr = "";
-       // string hasTable = "SELECT count(name) from MSysObjects where MSysObjects.Type=1 and name  = \"Junior\";";
-        string crTable = "create table Junior (ID COUNTER, FirstName char,LastName char);";
+       
+        string dbConStr = "Data Source=localhost;Initial Catalog=students;Integrated Security=False;User ID=hillary;Password=hillary";
+        string crTable = "create table Junior (ID IDENTITY(1,1), FirstName char,LastName char);";
         string getLast = "select ID,FirstName,LastName from Junior where ID = (select max(ID) from Junior);";
         string insStr = "insert into Junior(FirstName,LastName) Values (\'{0}\',\'{1}\'); ";
 
-        private OleDbConnection myDbConn =null;
-        public fmAccess()
+        //private OleDbConnection myDbConn =null;
+        private SqlConnection myDbConn = null;
+        public fmMSSQL()
         {
             InitializeComponent();
-            lbAccName.Text = "Нажмите Open, что бы выбрать базу Access";
+            txtConnStr.Text = dbConStr;
+            MessageBox.Show("Для подключения к MS SQL необходимо указать строку подключения. \nЕё пример указан в текстовом поле на форме.", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+
         }
-        private void ErrorsInfo(OleDbException err)
+        private void ErrorsInfo( SqlException err) //OleDbException err)
         {
             string errMsgs = "";
             for (int i = 0; i < err.Errors.Count; i++)
             {
                 errMsgs += "Index #" + i + "\n" +
                       "Message: " + err.Errors[i].Message + "\n" +
-                      "NativeError: " + err.Errors[i].NativeError + "\n" +
+                      "Server: " + err.Errors[i].Server + "\n" +
                       "Source: " + err.Errors[i].Source + "\n" +
-                      "SQLState: " + err.Errors[i].SQLState + "\n";
+                      "SQLState: " + err.Errors[i].State + "\n";
                 System.Diagnostics.EventLog log = new System.Diagnostics.EventLog();
                 log.Source = "My Application";
                 log.WriteEntry(errMsgs);
             }
-            MessageBox.Show("Возникли ошибки при работе с БД Access! Обратитесь к системному администратору!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show("Возникли ошибки при работе с MS SQL! Обратитесь к системному администратору!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             myDbConn.Dispose();
             myDbConn = null;
         }
@@ -51,72 +54,61 @@ namespace WindowsFormsApplication1
             // всё просто - получаем по подключению схему данных и тутже ывбираем из нее таблицу снужным названием
             // если она там есть , то вернется набор с именем  и его длина будет больше 0
             // если её там нет , то вертенся пустой набор с 0 длинной.
-            bool retVar = myDbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables,new object[] { null, null, null, "TABLE" }).Select("TABLE_NAME=\'"+tableName+"\'").Length>0;
+            bool retVar = myDbConn.GetSchema("TABLES").Select("TABLE_NAME=\'" + tableName + "\'").Length > 0;
+            // was for OLEDB GetOleDbSchemaTable(OleDbSchemaGuid.Tables,new object[] { null, null, null, "TABLE" }).Select("TABLE_NAME=\'"+tableName+"\'").Length>0;
             return retVar;
         }
         private bool MakeConnString() {
             bool retVar = true;
-            //поиск провайдера построен по тому же принципу как и поиск таблицы в базе 
-            string flExt = Path.GetExtension(dbName);
-            OleDbEnumerator enumerator = new OleDbEnumerator();
-            bool isNewOle = (enumerator.GetElements().Select("SOURCES_DESCRIPTION LIKE 'Microsoft.ACE.OLEDB%'").Length>0 )|| (enumerator.GetElements().Select("SOURCES_DESCRIPTION LIKE '%Access Database Engine OLE DB%'").Length>0)  ;  // new OleDB provider
-            bool isOldOle = enumerator.GetElements().Select("SOURCES_DESCRIPTION = 'Microsoft Jet 4.0 OLE DB Provider'").Length > 0; // old OleDB provider
-            if (isNewOle) // старая версия
+            dbConStr = txtConnStr.Text;
+            try
+            {
+                SqlConnectionStringBuilder tmpSql = new SqlConnectionStringBuilder(dbConStr);
+            }
+            catch (System.Collections.Generic.KeyNotFoundException ex)
             {
 
-                dbConStr += (dbName + "; Persist Security Info=False ");//"; Persist Security Info=False;");
+                MessageBox.Show("Неверная строка подключения к MS SQL!\n" + ex.Message, "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                retVar = false;
             }
-            else
+            catch (System.FormatException ex)
             {
-                if (flExt==".mdb" && isOldOle)
-                {
-                    dbConStr = "Provider = Microsoft.Jet.OLEDB.4.0; Data Source =" + dbName + "; Persist Security Info=False;User ID=Admin;Password=";
-                }
-                else
-                {
-                    retVar = false;
-                }
+                MessageBox.Show("Неверная строка подключения к MS SQL!\n"+ ex.Message, "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                retVar = false;
             }
+            catch (ArgumentException e)
+            {
+                MessageBox.Show("Неверная строка подключения к MS SQL!\n" +string.Format("{0}: {1}", e.GetType().Name, e.Message),"Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning); ;
+                retVar = false;
+            }
+
             return retVar;
         }
         private void MakeDbConnection() 
         {
-            myDbConn = new OleDbConnection(dbConStr);
-            
+            myDbConn = new SqlConnection(dbConStr);
             try
             {
                 myDbConn.Open();
             }
-            catch (OleDbException err)
+            catch (SqlException err)// (OleDbException err)
             {
                 ErrorsInfo(err);
-
             }
         }
-        private void btOpAcc_Click(object sender, EventArgs e)
+        private void btOpSql_Click(object sender, EventArgs e)
         {
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                dbName = openFileDialog1.FileName;
-                lbAccName.Text = dbName;
-                if (MakeConnString()== false) // нужного провайдера нет и не можем создать строку подключения
+                if (MakeConnString()== false) // не можем создать строку подключения
                 {
-                    MessageBox.Show("Нет необходимого OLEDB провайдера для работы с Access!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Неверная строка подключения к  MS SQL!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-             //   dbConStr += dbName;
                 MakeDbConnection();
                 if (myDbConn != null) { //активируем кнопки , если удачно открыли файл
                     this.btCreate.Enabled = true;
                     this.btAdd.Enabled = true;
                     this.btLast.Enabled = true;
                 }
-            }
-            else
-            {
-                MessageBox.Show("Необходимо указать , c какой базой Access нужно работать!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
         }
 
         private void btExit_Click(object sender, EventArgs e)
@@ -142,13 +134,13 @@ namespace WindowsFormsApplication1
                     }
                     else // таблицы Junior  нет в БД, создаем её
                     {
-                        OleDbCommand oleDbCommand = null;
+                        SqlCommand sqlCommand = null;
                         // creating the table
-                        oleDbCommand = new OleDbCommand(crTable, myDbConn);
-                        oleDbCommand.ExecuteNonQuery();
+                        sqlCommand = new SqlCommand(crTable, myDbConn);
+                        sqlCommand.ExecuteNonQuery();
                     }
                 }
-                catch (OleDbException err)
+                catch (SqlException err)
                 {
                     ErrorsInfo(err);
                 }
@@ -171,12 +163,12 @@ namespace WindowsFormsApplication1
                 //insStr + string.Format(" Values (\'{0}\',\'{1}\');", currDT.ToShortDateString(), currDT.ToShortTimeString());
                 try
                 {
-                    OleDbCommand oleDbCommand = null;
+                    SqlCommand sqlCommand = null;
                     // добавляем запись
-                    oleDbCommand = new OleDbCommand( string.Format(insStr, currDT.ToShortDateString(), currDT.ToLongTimeString()), myDbConn);
-                    oleDbCommand.ExecuteNonQuery();
+                    sqlCommand = new SqlCommand( string.Format(insStr, currDT.ToShortDateString(), currDT.ToLongTimeString()), myDbConn);
+                    sqlCommand.ExecuteNonQuery();
                 }
-                catch (OleDbException err)
+                catch (SqlException err)
                 {
                     ErrorsInfo(err);
                 }
@@ -194,10 +186,10 @@ namespace WindowsFormsApplication1
             {
                 try
                 {
-                    OleDbCommand oleDbCommand = null;
+                    SqlCommand oleDbCommand = null;
                     // ищем последнюю запись
-                    oleDbCommand = new OleDbCommand(getLast, myDbConn);
-                    OleDbDataReader dataReader= oleDbCommand.ExecuteReader();
+                    oleDbCommand = new SqlCommand(getLast, myDbConn);
+                    SqlDataReader dataReader= oleDbCommand.ExecuteReader();
                     if (dataReader.Read())
                     {
                         string msgStr = string.Format("Последняя запись в таблице \nID = {0}\nFirstName = {1}\nLastName={2}", dataReader.GetValue(0).ToString(), dataReader.GetString(1).Trim(), dataReader.GetString(2).Trim());
@@ -209,12 +201,14 @@ namespace WindowsFormsApplication1
                         MessageBox.Show("Данных в таблице нет!\n Их нужно добавить, нажав кнопку \'Добавляем запись\'", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
-                catch (OleDbException err)
+                catch (SqlException err)
                 {
 
                     ErrorsInfo(err);
                 }
             }
         }
+
+
     }
 }
