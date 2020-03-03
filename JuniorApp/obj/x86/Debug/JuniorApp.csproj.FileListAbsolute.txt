@@ -15,3 +15,4 @@ C:\Users\viacheslav.badikov\Source\Repos\BadikovVV\JuniorApp\JuniorApp\obj\x86\D
 C:\Users\viacheslav.badikov\Source\Repos\BadikovVV\JuniorApp\JuniorApp\obj\x86\Debug\JuniorApp.exe
 C:\Users\viacheslav.badikov\Source\Repos\BadikovVV\JuniorApp\JuniorApp\obj\x86\Debug\JuniorApp.pdb
 C:\Users\viacheslav.badikov\Source\Repos\BadikovVV\JuniorApp\JuniorApp\obj\x86\Debug\WindowsFormsApplication1.fmMSSQL.resources
+C:\Users\viacheslav.badikov\Source\Repos\BadikovVV\JuniorApp\JuniorApp\obj\x86\Debug\JuniorApp.csprojAssemblyReference.cache

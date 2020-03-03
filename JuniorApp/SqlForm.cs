@@ -1,13 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Data.OleDb;
 using System.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 
@@ -16,8 +9,8 @@ namespace WindowsFormsApplication1
     public partial class fmMSSQL: Form
     {
        
-        string dbConStr = "Data Source=localhost;Initial Catalog=students;Integrated Security=False;User ID=hillary;Password=hillary";
-        string crTable = "create table Junior (ID IDENTITY(1,1), FirstName char,LastName char);";
+        string dbConStr = "Data Source=wufvl0011034\\SQLTest;Initial Catalog=juniorDB;Integrated Security=True;TransparentNetworkIPResolution=False";
+        string crTable = "create table Junior (ID int IDENTITY(1,1), FirstName varchar(30),LastName varchar(30));";
         string getLast = "select ID,FirstName,LastName from Junior where ID = (select max(ID) from Junior);";
         string insStr = "insert into Junior(FirstName,LastName) Values (\'{0}\',\'{1}\'); ";
 
@@ -27,6 +20,9 @@ namespace WindowsFormsApplication1
         {
             InitializeComponent();
             txtConnStr.Text = dbConStr;
+            this.btCreate.Enabled = false;
+            this.btAdd.Enabled = false;
+            this.btLast.Enabled = false;
             MessageBox.Show("Для подключения к MS SQL необходимо указать строку подключения. \nЕё пример указан в текстовом поле на форме.", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
 
@@ -98,17 +94,16 @@ namespace WindowsFormsApplication1
         }
         private void btOpSql_Click(object sender, EventArgs e)
         {
-                if (MakeConnString()== false) // не можем создать строку подключения
-                {
-                    MessageBox.Show("Неверная строка подключения к  MS SQL!", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+            if (MakeConnString() == true) 
+            {
                 MakeDbConnection();
-                if (myDbConn != null) { //активируем кнопки , если удачно открыли файл
+                if (myDbConn != null)
+                { //активируем кнопки , если удачно подключились к базе
                     this.btCreate.Enabled = true;
                     this.btAdd.Enabled = true;
                     this.btLast.Enabled = true;
                 }
+            }
         }
 
         private void btExit_Click(object sender, EventArgs e)
@@ -194,12 +189,13 @@ namespace WindowsFormsApplication1
                     {
                         string msgStr = string.Format("Последняя запись в таблице \nID = {0}\nFirstName = {1}\nLastName={2}", dataReader.GetValue(0).ToString(), dataReader.GetString(1).Trim(), dataReader.GetString(2).Trim());
                         MessageBox.Show(msgStr, "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        dataReader.Close();
+                        
                     }
                     else
                     {
                         MessageBox.Show("Данных в таблице нет!\n Их нужно добавить, нажав кнопку \'Добавляем запись\'", "Тестовое приложение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
+                    dataReader.Close();
                 }
                 catch (SqlException err)
                 {

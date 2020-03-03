@@ -1,12 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 
@@ -50,7 +45,7 @@ namespace WindowsFormsApplication1
         {
             // всё просто - получаем по подключению схему данных и тутже ывбираем из нее таблицу снужным названием
             // если она там есть , то вернется набор с именем  и его длина будет больше 0
-            // если её там нет , то вертенся пустой набор с 0 длинной.
+            // если её там нет , то вернется пустой набор с длина == 0 .
             bool retVar = myDbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables,new object[] { null, null, null, "TABLE" }).Select("TABLE_NAME=\'"+tableName+"\'").Length>0;
             return retVar;
         }
@@ -61,7 +56,7 @@ namespace WindowsFormsApplication1
             OleDbEnumerator enumerator = new OleDbEnumerator();
             bool isNewOle = (enumerator.GetElements().Select("SOURCES_DESCRIPTION LIKE 'Microsoft.ACE.OLEDB%'").Length>0 )|| (enumerator.GetElements().Select("SOURCES_DESCRIPTION LIKE '%Access Database Engine OLE DB%'").Length>0)  ;  // new OleDB provider
             bool isOldOle = enumerator.GetElements().Select("SOURCES_DESCRIPTION = 'Microsoft Jet 4.0 OLE DB Provider'").Length > 0; // old OleDB provider
-            if (isNewOle) // старая версия
+            if (isNewOle) // новая версия
             {
 
                 dbConStr += (dbName + "; Persist Security Info=False ");//"; Persist Security Info=False;");
@@ -168,7 +163,6 @@ namespace WindowsFormsApplication1
                 // так как не была заявлена интерактивность в ТЗ,
                 // то в качестве FirstName записываем дату, а в качестве LastName записываем время 
                 DateTime currDT = DateTime.Now;
-                //insStr + string.Format(" Values (\'{0}\',\'{1}\');", currDT.ToShortDateString(), currDT.ToShortTimeString());
                 try
                 {
                     OleDbCommand oleDbCommand = null;
